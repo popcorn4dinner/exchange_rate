@@ -1,5 +1,5 @@
 module ExchangeRate
   module Errors
-    class InvalidCurrency < StandardError; end
+    class InvalidCurrency < RuntimeError; end
   end
 end

@@ -1,5 +1,5 @@
 module ExchangeRate
   module Errors
-    class InvalidExchangeDate < StandardError; end
+    class InvalidExchangeDate < RuntimeError; end
   end
 end
