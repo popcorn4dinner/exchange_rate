@@ -1,4 +1,5 @@
 require "bundler/setup"
+require "rspec"
 require "exchange_rate"
 
 RSpec.configure do |config|
