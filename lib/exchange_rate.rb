@@ -1,38 +1,37 @@
 require 'bigdecimal'
+require 'exchange_rate/configuration'
+require 'exchange_rate/calculation'
 
-class ExchangeRate
-  @config = { provider: nil, data_source_path: nil }
-  @valid_config_keys = @config.keys
+module ExchangeRate
+  class << self
+    attr_accessor :configuration
 
-  # Configure through hash
-  def self.configure(opts = {})
-    opts.each { |k,v| @config[k.to_sym] = v if @valid_config_keys.include? k.to_sym }
-  end
-
-  def self.at(exchanged_on, base_currency, counter_currency)
-    ExchangeRate::Calculation
-      .with(provider)
-      .from(base_currency)
-      .to(counter_currency)
-      .on(exchanged_on)
-      .execute
-  end
-
-  private
-
-  def provider
-    @provider ||= create_provider
-  end
-
-  def create_provider
-    unless valid_provider? config[:provider]
-      raise Error::Configuration, "Invalid Exchange Rate provider configured"
+    def at(exchanged_on, base_currency, counter_currency)
+      ExchangeRate::Calculation
+        .new(provider)
+        .execute(
+          from: base_currency,
+          to: counter_currency,
+          exchanged_on: exchanged_on
+        )
     end
 
-    config[:provider].new config[:data_source_path]
+    private
+
+    def provider
+      @provider ||= create_provider
+    end
+
+    def create_provider
+      configuration.provider.new configuration.data_source_path
+    end
   end
 
-  def valid_provider?(provider)
-    provider.respond_to?(:has_records_until, :base_currency, :exchange_rate_for)
+  def self.configuration
+    @configuration ||= ExchangeRate::Configuration.new
+  end
+
+  def self.configure
+    yield(configuration)
   end
 end
